@@ -1,13 +1,13 @@
 # Streaming Sketches: Flajolet–Martin (FM) and Count–Min Sketch (CMS)
 
-This project is a hands-on experimental study of classic **streaming sketches**—randomized algorithms designed for **single-pass**, **sublinear-memory** analytics on high-volume data streams. The focus is on *experiencing* (empirically) how sketch size affects accuracy, bias, variance, runtime, and convergence behavior.
+This project is a hands-on experimental study of classic **streaming sketches** - randomized algorithms designed for **single-pass**, **sublinear-memory** analytics on high-volume data streams. The focus is on *experiencing* (empirically) how sketch size affects accuracy, bias, variance, runtime, and convergence behavior.
 
 We implement:
 - **Flajolet–Martin (FM)** for estimating the number of **distinct elements** $F_0$
 - **Count–Min Sketch (CMS)** for estimating **item frequencies** $f(x)$
 
-> **Course / context:** Completed during my **MSc in Data Science & Machine Learning at Reichman University**, in the frame of the **Data Streaming Algorithms & Online Learning** course.  
-> **Grade:** 100/100 — Feedback: “Excellent work”.
+> Completed during my **MSc in Data Science & Machine Learning at Reichman University**, in the frame of the **Data Streaming Algorithms & Online Learning** course.  
+> **Grade:** 100/100 — Feedback: “Excellent Work”.
 
 ---
 
@@ -25,7 +25,7 @@ Given a data stream of length $N$, we want to:
 
 ---
 
-## Assignment Requirements (Implemented)
+## Requirements
 
 - Implement:
   - **FM** in three versions: regular, beta/average, and median-of-betas
@@ -175,25 +175,6 @@ The plots below are exported from the notebook and stored under `figures/`.
 
 ### 6) CMS Convergence Over Time (Tail Mean ARE, $w=256$ vs $w=4096$)
 ![CMS: Tail Convergence Over Time](figures/cms_tail_convergence_over_time.png)
-
----
-
-## How to Run
-
-1. Open the notebook in Google Colab.
-2. Run all cells from top to bottom.
-3. The notebook installs the only required dependency inside Colab:
-   - `datasets` (Hugging Face datasets)
-
-> Note: You may see an HF token warning when downloading a public dataset. It is harmless for this project.
-
----
-
-## Suggested Repo Layout
-
-- `README.md`
-- `Streaming_Sketches_FM_CMS.ipynb`
-- `figures/` (exported plots)
 
 ---
 
