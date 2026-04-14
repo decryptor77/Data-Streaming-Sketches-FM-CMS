@@ -74,17 +74,20 @@ Key idea: averaging and taking a median reduce the influence of extreme outliers
 
 ---
 
-### Count–Min Sketch (CMS) — Frequency Estimation ($f(x)$)
+### Count–Min Sketch (CMS) — Frequency Estimation ($F_1$)
 
 CMS maintains a $d \times w$ counter table. For a key $x$:
+
 $$
-\tilde f(x) = \min_{i\in\{1,\dots,d\}} C_i[h_i(x)]
+\tilde f(x) = \min_{i \in \{1,\dots,d\}} C_i[h_i(x)].
 $$
 
 CMS **never underestimates** (collisions only increase counters):
+
 $$
-\tilde f(x) \ge f(x)
+\tilde f(x) \ge f(x).
 $$
+
 The notebook includes a sanity check validating this property empirically.
 
 ---
@@ -92,13 +95,16 @@ The notebook includes a sanity check validating this property empirically.
 ## Why We Evaluate CMS on Heavy Hitters (HH) and Tail
 
 CMS guarantees are primarily **additive**:
+
 $$
-\tilde f(x) \le f(x) + \epsilon F_1 \quad \text{with probability } \ge 1-\delta
+\tilde f(x) \le f(x) + \epsilon F_1
+\quad \text{with probability } \ge 1-\delta,
 $$
-where $F_1 = \sum_x f(x)$ equals the stream length.
+
+where $F_1=\sum_x f(x)$ equals the stream length.
 
 Because the error term is additive, the *relative* impact differs by regime:
-- **Heavy hitters (HH):** large $f(x)$, so $\epsilon F_1 / f(x)$ is typically smaller.
+- **Heavy hitters (HH):** large $f(x)$, so $\epsilon F_1/f(x)$ is typically smaller.
 - **Tail:** small $f(x)$, so the same additive error can yield very large relative error.
 
 We therefore evaluate CMS separately on:
@@ -111,26 +117,38 @@ We therefore evaluate CMS separately on:
 
 ### CMS parameters
 We use depth $d=5$:
+
 $$
-\delta = 2^{-d} = 2^{-5} = 0.03125 \Rightarrow 1-\delta \approx 0.96875 \ (\ge 95\%)
+\delta = 2^{-d} = 2^{-5} = 0.03125
+\;\Rightarrow\;
+1-\delta \approx 0.96875 \;\ge 95\%.
 $$
-and sweep widths:
+
+We sweep widths:
+
 $$
-w \in \{256, 512, 1024, 2048, 4096\}
+w \in \{256, 512, 1024, 2048, 4096\},
 $$
+
 with the standard scaling:
+
 $$
-\epsilon \approx \frac{2}{w}
+\epsilon \approx \frac{2}{w}.
 $$
 
 ### FM Final (Median-of-Betas) confidence boosting
 With $t$ independent beta estimators, a Chernoff-style bound yields:
+
 $$
-\delta \approx e^{-t/12}
+\delta \approx e^{-t/12}.
 $$
+
 Choosing $t=36$ gives:
+
 $$
-\delta \approx e^{-36/12} = e^{-3} \approx 0.0498 \Rightarrow 1-\delta \approx 0.9502 \ (\ge 95\%)
+\delta \approx e^{-36/12}=e^{-3}\approx 0.0498
+\;\Rightarrow\;
+1-\delta \approx 0.9502 \;\ge 95\%.
 $$
 
 ---
@@ -143,6 +161,7 @@ To avoid rebuilding CMS from scratch for every width, we:
 
 ### Important detail: High-bit indexing
 We map a 64-bit hash $h$ into $[0,w)$ using the top $k=\log_2(w)$ bits:
+
 $$
 \text{idx} = h \gg (64-k)
 $$
@@ -178,8 +197,28 @@ The plots below are exported from the notebook and stored under `figures/`.
 
 ---
 
+## Conclusions
+
+### FM (Distinct Counting)
+- The **regular** FM estimator is extremely unstable: rare very small minimum-hash values make the inverse explode. This appears empirically as very high mean ARE / RRMSE, huge positive bias, and extremely large normalized variance.
+- The **beta (average-of-minima)** variant improves accuracy as the number of registers $s$ increases, reducing variance and bringing the bias closer to 0.
+- The **median-of-betas (final)** estimator is the most robust: taking the median across $t$ independent beta estimators suppresses outliers and yields the most stable convergence over time, at the cost of higher memory and runtime.
+
+### CMS (Frequency Estimation)
+- CMS **never underestimates** $\tilde f(x)\ge f(x)$, which is confirmed by the notebook’s sanity check.
+- CMS exhibits **positive bias** due to collisions, and this bias decreases as width $w$ increases.
+- Tail items have much larger **relative** errors than heavy hitters, which matches the **additive** error guarantee $\tilde f(x)\le f(x)+\epsilon F_1$: for small $f(x)$, the ratio $\epsilon F_1/f(x)$ can be large.
+- In the convergence plots, small widths (e.g., $w=256$) accumulate collision noise quickly, while larger widths (e.g., $w=4096$) remain far more stable—especially for tail keys.
+
+### Final Takeaway
+- **FM:** regular is a useful baseline but not practical; beta improves significantly; median-of-betas provides the best robustness.
+- **CMS:** works well for heavy hitters and moderate counts, but tail relative error can be large unless width is sufficiently large, reflecting the additive nature of its guarantees.
+
+---
+
 ## Author
 
 **Noor Nashef**  
 MSc Data Science & Machine Learning student, Reichman University<br>
 BSc in Information Systems Engineering specialized in Machine Learning, Technion
+
