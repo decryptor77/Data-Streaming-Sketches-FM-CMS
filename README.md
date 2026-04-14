@@ -108,7 +108,7 @@ Because the error term is additive, the *relative* impact differs by regime:
 - **Tail:** small $f(x)$, so the same additive error can yield very large relative error.
 
 We therefore evaluate CMS separately on:
-- **HH:** top-$K$ keys by true frequency
+- **HH:** top-K keys by true frequency
 - **Tail:** $K$ randomly sampled non-HH keys
 
 ---
@@ -173,6 +173,92 @@ Let $\text{factor} = w_{\max}/w$. Then each bucket at width $w$ corresponds to a
 
 ---
 
+## Metrics
+
+We evaluate sketches using accuracy, bias, and variance statistics over $T$ independent trials. Let $\theta$ be the true value (e.g., $\theta = F_0$ for FM, or $\theta = F_1$ for CMS), and let $\hat{\theta}^{(t)}$ be the estimator output in trial $t \in \{1,\ldots,T\}$.
+
+### Absolute Relative Error (ARE)
+Per trial:
+
+$$
+\mathrm{ARE}^{(t)} = \frac{\left|\hat{\theta}^{(t)} - \theta\right|}{\theta}
+$$
+
+We typically report the mean ARE across trials:
+
+$$
+\overline{\mathrm{ARE}} = \frac{1}{T}\sum_{t=1}^{T} \mathrm{ARE}^{(t)}
+$$
+
+### Relative RMSE (RRMSE)
+Per trial squared error:
+
+$$
+\left(\hat{\theta}^{(t)} - \theta\right)^2
+$$
+
+RMSE across trials:
+
+$$
+\mathrm{RMSE} = \sqrt{\frac{1}{T}\sum_{t=1}^{T}\left(\hat{\theta}^{(t)} - \theta\right)^2}
+$$
+
+Relative RMSE:
+
+$$
+\mathrm{RRMSE} = \frac{\mathrm{RMSE}}{\theta}
+$$
+
+### Bias
+Bias is the difference between the estimator’s mean and the truth:
+
+$$
+\mathrm{Bias} = \mathbb{E}[\hat{\theta}] - \theta
+$$
+
+Empirically (over trials):
+
+$$
+\widehat{\mathrm{Bias}} = \left(\frac{1}{T}\sum_{t=1}^{T}\hat{\theta}^{(t)}\right) - \theta
+$$
+
+An estimator is **unbiased** if $\mathbb{E}[\hat{\theta}] = \theta$, i.e., bias equals $0$.
+
+### Normalized Variance
+Variance across trials:
+
+$$
+\mathrm{Var}(\hat{\theta}) = \frac{1}{T-1}\sum_{t=1}^{T}\left(\hat{\theta}^{(t)} - \overline{\hat{\theta}}\right)^2
+$$
+
+Normalized variance (as required in the project):
+
+$$
+\mathrm{NormVar} = \frac{\mathrm{Var}(\hat{\theta})}{\theta}
+$$
+
+### CMS: Aggregating Over a Set of Keys (HH vs Tail)
+For CMS we evaluate frequencies for a set of $K$ query keys (heavy hitters or tail). For a key $x_j$ with true count $\theta_j=f(x_j)$, we compute per-key metrics and then average over the $K$ keys.
+
+For example, mean ARE for a fixed width $w$ in trial $t$:
+
+$$
+\mathrm{ARE}^{(t)}(w) = \frac{1}{K}\sum_{j=1}^{K} \frac{\left|\tilde f^{(t)}(x_j;w) - f(x_j)\right|}{f(x_j)}
+$$
+
+Then we report the mean over trials of $\mathrm{ARE}^{(t)}(w)$ (and similarly for bias and variance).
+
+### Confidence Intervals (Optional)
+We plot 95% confidence intervals (CI) across trials using a normal approximation:
+
+$$
+\mathrm{CI}_{95} \approx 1.96 \cdot \frac{s}{\sqrt{T}}
+$$
+
+where $s$ is the sample standard deviation across trials.
+
+---
+
 ## Key Figures
 
 The plots below are exported from the notebook and stored under `figures/`.
@@ -221,4 +307,5 @@ The plots below are exported from the notebook and stored under `figures/`.
 **Noor Nashef**  
 MSc Data Science & Machine Learning student, Reichman University<br>
 BSc in Information Systems Engineering specialized in Machine Learning, Technion
+
 
